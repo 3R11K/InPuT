@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+	<!-- Custom styles for this template -->
+	<link href="../css/index.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+	<!-- jquery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+	<style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        .modal-conteudo {
+            border-radius: 10px;
+            background-color: #fff;
+            width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        .botao-fechar {
+            float: right;
+            cursor: pointer;
+        }
+
+    </style>
+
+	    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+
+		<a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" style="display: flex; align-content: center; align-items: center;">
+			<img class="me-2" src="../assets/logo_white.svg" alt="" width="40" height="40">
+			<h4 class="mb-0">InPuT</h4>
+		</a>
+
+		<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<!-- <input class="form-control form-control-dark w-100 rounded-end-10 rounded-start-0" type="text" placeholder="Search" aria-label="Search"> -->
+		<button type="button" id="botao-ajuda" class="btn btn-sm btn-outline-secondary">?</button>
+		<div id="modal-ajuda" class="modal">
+			<div class="modal-conteudo">
+				<span id="fechar-modal" class="botao-fechar"><b>x</b></span>
+				<h4>Como usar essa página?</h4> <br>
+				<p> Aqui você pode selecionar os filtros para mudar o mapa ou gráficos de acordo com sua vontade.</p>
+				<p>	Ao clicar nos marcadores do mapa, aparecerão os dados específicos de cada evento. </p>
+				<p>	Caso queria remover um novo gráfico reinicie a página. </p> 
+				<p>	Os comentários são por máquina, portanto não é possível editar ou remover comentários de outras pessoas.</p>
+			</div>
+		</div>
+
+		<div class="navbar-nav">
+			<div class="nav-item text-nowrap">
+				<a class="nav-link px-3" href="/api/logout">
+					Sign out
+				</a>
+			</div>
+		</div>
+
+	</header>
+
+<div class="container-fluid">
+  <div class="row">
+	<nav id="sidebarMenu" class="col-md-3 col-lg-2 mt-2 d-md-block bg-body-tertiary sidebar collapse">
+	  <div class="position-sticky pt-3 sidebar-sticky">
+		<ul class="nav flex-column">
+		  <li class="nav-item">
+			<a class="nav-link" href="/">
+			  	<span data-feather="home" class="align-text-bottom"></span>
+			  	Painel de Controle
+			</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="/relatorios">
+			  <span data-feather="file-text" class="align-text-bottom"></span>
+			  Relatórios
+			</a>
+		  </li>
+		  <li class="nav-item" id='upload-div'>
+			<a class="nav-link" href="/upload">
+				<span data-feather="upload-cloud" class="align-text-bottom"></span>
+				Upload
+			</a>
+		</li>
+		</ul>
+
+		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase me-1">
+			<span style="margin-bottom: 2px">Relatórios Favoritos</span>
+			<a class="link-secondary mb-0" href="#" aria-label="Add a new report">
+			  <span data-feather="plus-circle" class="align-text-bottom"></span>
+			</a>
+		  </h6>
+		<ul class="nav flex-column mb-2" id="fav-bar">
+		</ul>
+	  </div>
+	</nav>
+
+	<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+			<h1 class="h2" id="title">Relatório #1</h1>
+			<div class="btn-toolbar mb-2 mb-md-0">
+				<div class="btn-group me-2">
+					<button type="button" onclick="newFav(1)" class="btn btn-sm btn-outline-secondary">Adicionar aos Favoritos</button>
+					<button type="button" onclick="downloadZip(1)" class="btn btn-sm btn-outline-secondary">Baixar Relatório</button>
+					<!-- <button type="button" onclick="downloadPDF(1)" class="btn btn-sm btn-outline-secondary">PDF Relatório</button> -->
+				</div>
+			</div>
+		</div>
+
+		<!-- CRIA-SE O OBJETO DE ACCORDION OOOOOO -->
+		<div class="accordion" id="accordion1">
+
+			<!-- ITEM DE ACCORDION -->
+			<div class="accordion-item">
+
+				<!-- pra gabi ou qualquer pessoa q tiver passando aqui pra fazer desenvolvimento de alguma coisa aqui: -->
+
+				<!-- tem um jeito de deixar o accordion aberto qdo vc carrega a pagina, ent oq vc pode fazer eh  -->
+				<!-- mudar suas funcoes "vagoes" e "choque" pra q elas adicionem a tag de deixar o accordion aberto  -->
+				<!-- qdo o cara tiver clicado em algum dos botoes do dropdown OU totalmete mudar esses botoes pra -->
+				<!-- fazer com q eles virem collapses, vc q escolhe -->
+
+				<!-- o jeito de deixar o accordion aberto qdo a pagina carrega eh adicionar "show" dentro da tag da div com id "collapseOne" ou "collapseID". assim a classe ficaria: "accordion-collapse collapse show". -->
+				<!-- tambem n esquece de tirar o "collapsed" do accordion button (o header do item do accordion) pra fazer ele ficar selecionado bonitinho fofinho ai q cuticuti -->
+
+				<!-- pra fazer isso vai no
+
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseID" aria-expanded="true" aria-controls="collapseID">
+
+					e tira o "collapsed" dele, deixando assim:
+
+					<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseID" aria-expanded="true" aria-controls="collapseID">
+
+				-->
+
+				<!-- resumindo, tira o "collapsed do header do accordion e adiciona "show" no corpo do item de accordion -->
+
+
+				<!-- HEADER DO ITEM DE ACCORDION (OQ VAI MOSTRAR ANTES DE CLICAR) -->
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+					  	Mapas
+					</button>
+				</h2>
+
+				<!-- CORPO DO ITEM DE ACCORDION (OQ VAI MOSTRAR EMBAIXO DO HEADER, DEPOIS DE CLICAR) -->
+				<div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+					<div class="accordion-body">
+
+						<!-- DIV PROS DROPDOWNS -->
+						<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+							<div class="btn-toolbar mb-2 mb-md-0">
+
+								<!-- DROPDOWN DE VIAGENS -->
+								<div class="dropdown-center btn-group me-2">
+									<!-- TÍTULO DO DROPDOWN -->
+									<button id="dropdownViagemMapa" class=" btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										Selecione a Viagem
+									</button>
+
+									<!-- ITENS DO DROPDOWN -->
+									<div class="dropdown-menu">
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(1); selectOption(this, 'dropdownViagemMapa')">Viagem 1</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(2); selectOption(this, 'dropdownViagemMapa')">Viagem 2</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(3); selectOption(this, 'dropdownViagemMapa')">Viagem 3</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(4); selectOption(this, 'dropdownViagemMapa')">Viagem 4</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(5); selectOption(this, 'dropdownViagemMapa')">Viagem 5</button>
+									</div>
+								</div>
+
+
+								<!-- DROPDOWN DE VAGOES -->
+								<div class="dropdown-center btn-group me-2">
+									<!-- TÍTULO DO DROPDOWN -->
+									<button id="dropdownVagoesMapa" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+										Selecione o Vagão
+									</button>
+
+									<!-- ITENS DO DROPDOWN -->
+									<div class="dropdown-menu">
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(undefined, undefined,'E'); selectOption(this, 'dropdownVagoesMapa')">Vagão E</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(undefined, undefined,'F'); selectOption(this, 'dropdownVagoesMapa')">Vagão F</button>
+									</div>
+								</div>
+
+
+								<!-- DROPDOWN DE FILTROS DE OCORRENCIAS -->
+								<div class="dropdown-center">
+									<!-- TÍTULO DO DROPDOWN -->
+									<button id="dropdownOcorrenciaMapa" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+										<span data-feather="plus-circle" class="align-text-bottom">
+										</span>
+										Adicionar Filtro
+									</button>
+
+									<!-- ITENS DO DROPDOWN -->
+									<div class="dropdown-menu">
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(undefined, 1); selectOption(this, 'dropdownOcorrenciaMapa')">Choque 1</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(undefined, 2); selectOption(this, 'dropdownOcorrenciaMapa')">Choque 2</button>
+										<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initMap(undefined, 3); selectOption(this, 'dropdownOcorrenciaMapa')">Pico</button>
+									</div>
+								</div>
+
+							</div>
+
+							<div>
+								<!-- PLACEHOLDER PRA COISAS Q VAO NA DIREITA -->
+								<!-- PODE TESTAR COLOCAR ALGUMA COISA AQ PRA VER AONDE VAI -->
+							</div>
+						</div>
+						<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-0 pb-2 mb-3 border-bottom">
+							<!-- PLACEHOLDER PRA COISAS Q VAO EMBAIXO MAS N FORA DA LINHAZINHA -->
+							<!-- PODE TESTAR COLOCAR ALGUMA COISA AQ PRA VER AONDE VAI -->
+						</div>
+
+						<!-- MAPA -->
+						<div id="map" style="height:520px; width:100%" class="py-3 pt-5"></div>
+
+					</div>
+				</div>
+			</div>
+			<!-- FIM DO ITEM DE ACCORDION -->
+
+			<!-- ITEM DE ACCORDION 2 -->
+			<div class="accordion-item">
+				<!-- HEADER DO ITEM DE ACCORDION (OQ VAI MOSTRAR ANTES DE CLICAR) -->
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+						Gráficos
+					</button>
+				</h2>
+
+				<!-- CORPO DO ITEM DE ACCORDION (OQ VAI MOSTRAR EMBAIXO DO HEADER, DEPOIS DE CLICAR) -->
+				<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+					<div class="accordion-body" id="graphAcordion">
+						<div id="graph1">
+
+							<!-- PRA QUEM TIVER PASSANDO AQUI E TIVER MEXENDO NESSE CODIGO: -->
+							<!-- varios botoes dos dropdown tao com a funcao "return false" pq eles estavam conectados a funcao -->
+							<!-- choque e vagao da gabi, q era correspondente a parte de mapas. aparentemente n eh pra eu fazer -->
+							<!-- essas funcoes ainda mas se vcs quiserem eu tambem posso fazer. bem, eu coloquei o return false -->
+							<!-- pra nao dar erro no console, mas se vcs quiserem fazer as funcoes podem tirar o return false -->
+
+							<!-- DIV PROS DROPDOWNS -->
+							<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+								<div class="btn-toolbar mb-2 mb-md-0">
+
+									<!-- DROPDOWN DE VIAGENS -->
+									<div class="dropdown-center btn-group me-2">
+										<!-- TÍTULO DO DROPDOWN -->
+										<button id="dropdownViagem" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+											Selecione a Viagem
+										</button>
+
+										<!-- ITENS DO DROPDOWN -->
+										<div class="dropdown-menu">
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', viagem=1); selectOption(this, 'dropdownViagem')">Viagem 1</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', viagem=2); selectOption(this, 'dropdownViagem')">Viagem 2</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', viagem=3); selectOption(this, 'dropdownViagem')">Viagem 3</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', viagem=4); selectOption(this, 'dropdownViagem')">Viagem 4</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', viagem=5); selectOption(this, 'dropdownViagem')">Viagem 5</button>
+										</div>
+									</div>
+
+									<!-- DROPDOWN DE VAGOES -->
+									<div class="dropdown-center btn-group me-2">
+
+										<!-- TÍTULO DO DROPDOWN -->
+										<button id="dropdownVagao" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+											Selecione o Vagão
+										</button>
+
+										<!-- ITENS DO DROPDOWN -->
+										<div class="dropdown-menu">
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined, undefined, 'E'); selectOption(this, 'dropdownVagao')">Vagão E</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined, undefined, 'F'); selectOption(this, 'dropdownVagao')">Vagão F</button>									</div>
+
+									</div>
+
+									<!-- DROPDOWN DE FILTROS DE OCORRENCIAS -->
+									<div class="dropdown-center">
+
+										<!-- TÍTULO DO DROPDOWN -->
+										<button id="dropdownOcorrencia" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+											Tipo de Ocorrência
+										</button>
+
+										<!-- ITENS DO DROPDOWN -->
+										<div class="dropdown-menu">
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick=" initGraph(add = false, graphID ='myChart', 'chartFather', undefined, 1); selectOption(this, 'dropdownOcorrencia');  disable('engate', 'deltaT', 'fmax')">Choque Tipo 1</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick=" initGraph(add = false, graphID ='myChart', 'chartFather', undefined, 2); selectOption(this, 'dropdownOcorrencia');  disable('engate', 'deltaT', 'fmax')">Choque Tipo 2</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined, 3); selectOption(this, 'dropdownOcorrencia'); enable('engate', 'deltaT', 'fmax')">Pico</button>
+										</div>
+									</div>
+
+								</div>
+
+								<!-- as coisas dentro desse div vao na direitinha -->
+								<div>
+
+									<!-- DROPDOWN PRA SELECIONAR TIPO DE GRAFICO -->
+									<div class="dropdown-center">
+
+										<!-- TÍTULO DO DROPDOWN -->
+										<button id="dropdownInf" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+											Informações à Processar
+										</button>
+
+										<!-- ITENS DO DROPDOWN -->
+										<div class="dropdown-menu">
+											<!-- AQUI VAI TER Q FAZER JAVASCRIPT PRA MUDAR O DROPDOWN DEPENDENDO SE EH CHOQUE OU PICO -->
+											<!-- ITEM DE DROPDOWN DISABLED VC BOTA NA CLASSE: DROPDOWN-ITEM DISABLED -->
+											<!-- ENFASE NO "DISABLED" GNT -->
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 3); selectOption(this, 'dropdownInf')">PEG_PSI</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 2); selectOption(this, 'dropdownInf')">ACT</button>
+											<button type="button" id ="fmax" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 1); selectOption(this, 'dropdownInf')">Força Máxima</button>
+											<button type="button" class="dropdown-item btn btn-sm btn-outline-secondary" onclick="initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 4);selectOption(this, 'dropdownInf')">Velocidade</button>
+											<button type="button" id="engate" class="dropdown-item disabled btn btn-sm btn-outline-secondary" onclick="selectOption(this, 'dropdownInf'); initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 5)">Engate</button>
+											<button type="button" id="deltaT" class="dropdown-item disabled btn btn-sm btn-outline-secondary" onclick="selectOption(this, 'dropdownInf'); initGraph(add = false, graphID ='myChart', 'chartFather', undefined,undefined, undefined, 6)">ΔT</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- DIV PROS GRÁFICOS -->
+							<div style="width:90%; height:450px; display: block; overflow-x: scroll;" class="ms-5 me-3" id="chartFather">
+								<!-- o accordion eh mto estranho em alocacao de espaco, ent tem q fazer um div container e definir o tamanho do -->
+								<!-- grafico +- dentro desse div, so pro grafico poder caber dentro desse div, se nao o accordion come o grafico. -->
+								<div id="Place">
+									<canvas id="myChart"></canvas>
+								</div>
+							</div>
+						</div>
+						<button id="addButton" type="button" onclick="initGraph(true)" class="btn btn-sm btn-outline-secondary">adcionar gráfico</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- ITEM DE ACCORDION 3 -->
+			<div class="accordion-item">
+				<!-- HEADER DO ITEM DE ACCORDION (OQ VAI MOSTRAR ANTES DE CLICAR) -->
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+						Comentários
+					</button>
+				</h2>
+
+				<!-- CORPO DO ITEM DE ACCORDION (OQ VAI MOSTRAR EMBAIXO DO HEADER, DEPOIS DE CLICAR) -->
+				<div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+					<div class="accordion-body" id="comment-loader-target">
+					</div>
+
+					<div id="comment-adder-target">
+						<button id="add-comment-button" type="button" class="btn btn-primary mb-3" onclick="start_add_comment(); toast(2)" style="margin-left:20px;">Adicionar Comentário</button>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<script>
+        const botaoAjuda = document.getElementById('botao-ajuda');
+        const modalAjuda = document.getElementById('modal-ajuda');
+        const fecharModal = document.getElementById('fechar-modal');
+
+        botaoAjuda.addEventListener('click', function() {
+        modalAjuda.style.display = 'block';
+        });
+
+        fecharModal.addEventListener('click', function() {
+        modalAjuda.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+        if (event.target === modalAjuda) {
+            modalAjuda.style.display = 'none';
+        }
+        });
+
+    </script>
+
+	<script src="../js/download_relatorio.js"></script>
+
+	<script src="../js/index.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
+
+	<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+		({key: "AIzaSyC52kx_hADFDf9a5jb_BtIRaNaXS5aE9GA", v: "weekly"});</script>
+
+	<script src="../js/insert-favs.js" type="module"></script>
+	<script src="../js/reports/1.js"></script>
+
+	<script src="../js/comment_system_front/comment_handler.js"></script>
+	<script src="../js/comment_system_front/comment_loader.js"></script>
+	<script src="../js/upload/uploadFunction.js"></script>
+	<script src="./js/toast.js"></script>
+
+	<script type="module">
+		$(document).ready(function(){
+			$('textarea').each(function () {
+				$(this).on('input', function () {
+					this.style.height = 'auto';
+					this.style.height = (this.scrollHeight+3) + 'px';
+				});
+
+				// trigger input on collapsethree open
+				$('#collapseThree').on('shown.bs.collapse', function () {
+					$(this).find('textarea').trigger('input');
+				});
+			});
+		});
+
+
+	</script>
+</body>
+</html>
